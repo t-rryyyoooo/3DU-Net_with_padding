@@ -1,0 +1,7 @@
+__pycache__
+lightning_logs/
+.DS_Store
+fail/
+result/
+test/
+.ipynb_checkpoints/
