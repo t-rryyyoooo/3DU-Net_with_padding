@@ -20,7 +20,6 @@ def ParseArgs():
     
     parser.add_argument("--patch_size", help="28-44-44", default="28-44-44")
     parser.add_argument("--slide", help="2-2-2", default=None)
-    parser.add_argument("--padding", help="44-44-44", default=None)
 
     args = parser.parse_args()
     return args
@@ -54,26 +53,11 @@ def main(args):
     else:
         slide = None
 
-
-    """ Get the padding size from string."""
-    if args.padding is not None:
-        matchobj = re.match("([0-9]+)-([0-9]+)-([0-9]+)", args.padding)
-        if matchobj is None:
-            print("[ERROR] Invalid patch size : {}.".fotmat(args.padding))
-            sys.exit()
-
-        padding = [int(s) for s in matchobj.groups()]
-    
-    else:
-        padding = None
-
-
     extractor = extor(
             image = image, 
             label = label, 
             patch_size = patch_size, 
             slide = slide, 
-            padding = padding
             )
 
     extractor.execute()

@@ -9,7 +9,7 @@ from functions import paddingImage, croppingImage, getImageWithMeta, createParen
 import re
 
 class extractor():
-    def __init__(self, image, label, patch_size=[28, 44, 44], slide=None, padding=None, only_mask=False):
+    def __init__(self, image, label, patch_size=[16, 44, 44], slide=None, padding=None, only_mask=False):
         self.image = image
         self.label = label
 
@@ -38,8 +38,8 @@ class extractor():
         lower_padding_size_label = padding_size // 2
         upper_padding_size_label = np.where((padding_size % 2) != 0, padding_size // 2 + 1, padding_size // 2)
 
-        lower_padding_size_image = lower_padding_size_label + self.padding_patch
-        upper_padding_size_image = upper_padding_size_label + self.padding_patch
+        lower_padding_size_image = lower_padding_size_label
+        upper_padding_size_image = upper_padding_size_label
 
         self.meta["lower_padding_size"] = lower_padding_size_label
         self.meta["upper_padding_size"] = upper_padding_size_label
@@ -123,12 +123,15 @@ class extractor():
         if not save_image_path.parent.exists():
             createParentPath(str(save_image_path))
 
-        for i, (image, label) in tqdm(enumerate(zip(self.image_list, self.label_list)), desc="Saving images and labels...", ncols=60):
-            save_image_path = save_path / patientID / "image_{:03d}.mha".format(i)
-            save_label_path = save_path / patientID / "label_{:03d}.mha".format(i)
+        with tqdm(total=len(self.image_list), desc="Saving image and label...", ncols=60) as pbar:
+            for i, (image, label) in enumerate(zip(self.image_list, self.label_list)):
+                save_image_path = save_path / patientID / "image_{:04d}.mha".format(i)
+                save_label_path = save_path / patientID / "label_{:04d}.mha".format(i)
 
-            sitk.WriteImage(image, str(save_image_path), True)
-            sitk.WriteImage(label, str(save_label_path), True)
+                sitk.WriteImage(image, str(save_image_path), True)
+                sitk.WriteImage(label, str(save_label_path), True)
+                pbar.update(1)
+
 
 
     def restore(self, predict_array_list):
