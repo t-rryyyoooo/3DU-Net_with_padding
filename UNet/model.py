@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-from .utils import cropping3D
+from utils import cropping3D
 
 class DoubleConvolution(nn.Module):
     def __init__(self, in_channel, mid_channel, out_channel, n=2, use_bn=True):
@@ -9,9 +9,9 @@ class DoubleConvolution(nn.Module):
         self.layers = []
         for i in range(1, n + 1):
             if i == 1:
-                x = nn.Conv3d(in_channel, mid_channel, (3, 3, 3))
+                x = nn.Conv3d(in_channel, mid_channel, (3, 3, 3), padding=(1, 1, 1))
             else:
-                x = nn.Conv3d(mid_channel, out_channel, (3, 3, 3))
+                x = nn.Conv3d(mid_channel, out_channel, (3, 3, 3), padding=(1, 1, 1))
 
             self.layers.append(x)
 
@@ -64,9 +64,10 @@ class CreateUpConvBlock(nn.Module):
     def forward(self, x1, x2):
         x1 = self.convTranspose(x1)
         c = [(i - j) for (i, j) in zip(x2.size()[2:], x1.size()[2:])]
-        hc = [ i // 2 for i in c]
 
-        x2 = cropping3D(x2, (hc[0], hc[0] if c[0]%2 == 0 else hc[0] + 1), (hc[1], hc[1] if c[1]%2 == 0 else hc[1] + 1), (hc[2], hc[2] if c[2]%2 == 0 else hc[2] + 1))
+        x1 = nn.functional.pad(x1, (c[2] // 2, (c[2] * 2 + 1) // 2, c[1] // 2, (c[1] * 2 + 1) // 2, c[0] // 2, (c[0] * 2 + 1) // 2))
+        
+
         x = torch.cat([x2, x1], dim=1)
 
         x = self.DoubleConvolution(x)
@@ -119,7 +120,6 @@ class UNetModel(nn.Module):
             conv_results.append(conv_result)
 
         conv_results = conv_results[::-1]
-        #conv_results = nn.ModuleList(conv_results)
 
         x, _ = self.lastContract(x)
         if self.use_dropout:
@@ -135,7 +135,7 @@ class UNetModel(nn.Module):
 
 if __name__ == "__main__":
     model=UNetModel(1 ,3)
-    net_shape = [1, 1, 44+ 44*2, 44 + 44*2, 28 + 44*2]
+    net_shape = [1, 1, 44, 44, 16]
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     model.to(device)

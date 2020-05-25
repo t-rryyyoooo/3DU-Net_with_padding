@@ -15,11 +15,6 @@ class extractor():
 
         self.patch_size = np.array(patch_size)
 
-        if padding is None:
-            self.padding_patch = np.array((44, 44, 44))
-        else:
-            self.padding_patch = np.array(padding)
-
         """ Check slide size is correct."""
         if slide is None:
             self.slide = self.patch_size
@@ -57,12 +52,12 @@ class extractor():
 
 
         """ Caluculate the patch size. """
-        image_patch_size = self.patch_size + self.padding_patch * 2
+        image_patch_size = self.patch_size
         label_patch_size = self.patch_size
 
         self.meta["patch_size"] = label_patch_size
 
-        """ Clip the patch size image from self.image and sdf.label. """
+        """ Clip the patch size image from self.image and self.label. """
         self.image_list = [] 
         self.image_array_list = []
         self.label_list = []
