@@ -86,6 +86,8 @@ class extractor():
                         ly_slice = slice(ly, ly + label_patch_size[2])
 
                         clipped_label = padded_label[lz_slice, lx_slice, ly_slice]
+                        clipped_label.SetOrigin(self.label.GetOrigin())
+
                         clipped_label_array = sitk.GetArrayFromImage(clipped_label)
 
                         if self.only_mask and (clipped_label_array == 0).all():
@@ -100,6 +102,7 @@ class extractor():
                         iy_slice = slice(iy, iy + image_patch_size[2])
  
                         clipped_image = padded_image[iz_slice, ix_slice, iy_slice]
+                        clipped_image.SetOrigin(self.label.GetOrigin())
                         clipped_image_array = sitk.GetArrayFromImage(clipped_image)
                         self.image_list.append(clipped_image)
                         self.image_array_list.append(clipped_image_array)
