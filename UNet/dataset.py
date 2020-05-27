@@ -8,6 +8,7 @@ class UNetDataset(data.Dataset):
         self.phase = phase
 
         self.data_list = separateData(dataset_path, criteria, phase)
+        print(self.data_list)
 
     def __len__(self):
         return len(self.data_list)

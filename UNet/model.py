@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-from utils import cropping3D
+from .utils import cropping3D
 
 class DoubleConvolution(nn.Module):
     def __init__(self, in_channel, mid_channel, out_channel, n=2, use_bn=True):

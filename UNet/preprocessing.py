@@ -29,8 +29,8 @@ class AffineTransform(object):
 
     def __call__(self, image, label):
         """
-        image : 256 * 256 * x
-        label : 256 * 256 * x
+        image : 44 * 44 * 16
+        label : 44 * 44 * 16
         """
         parameters = makeAffineParameters(image, self.translate_range, self.rotate_range, self.shear_range, self.scale_range)
         affine = makeAffineMatrix(*parameters)

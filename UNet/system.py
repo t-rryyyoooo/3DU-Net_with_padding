@@ -37,11 +37,13 @@ class UNetSystem(pl.LightningModule):
         label = label.to(self.device, dtype=torch.long)
 
         pred = self.forward(image).to(self.device)
+
         """ Channel last for loss. """
         pred_last = pred.permute(0, 2, 3, 4, 1).to(self.device)
 
         pred_onehot = torch.eye(self.num_class)[pred.argmax(dim=1)].to(self.device)
         label_onehot = torch.eye(self.num_class)[label].to(self.device)
+        print((label == 1).sum(), (label == 2).sum())
 
         bg_dice, kidney_dice, cancer_dice = self.DICE.computePerClass(label_onehot, pred_onehot)
 
@@ -55,7 +57,7 @@ class UNetSystem(pl.LightningModule):
                 "cancer_dice" : cancer_dice
                 }
         progress_bar = {
-                "train_loss" : loss
+                "train_loss" : loss,
                 }
         
         return {"loss" : loss, "log" : tensorboard_logs}#, "progress_bar" : progress_bar}
@@ -67,8 +69,8 @@ class UNetSystem(pl.LightningModule):
         pred = self.forward(image)
         pred_last = pred.permute(0, 2, 3, 4, 1).to(self.device)
 
-        pred_onehot = torch.eye(self.num_class)[pred.argmax(dim=1)]
-        label_onehot = torch.eye(self.num_class)[label]
+        pred_onehot = torch.eye(self.num_class)[pred.argmax(dim=1)].to(self.device)
+        label_onehot = torch.eye(self.num_class)[label].to(self.device)
 
         bg_dice, kidney_dice, cancer_dice = self.DICE.computePerClass(label_onehot, pred_onehot)
 
@@ -83,7 +85,8 @@ class UNetSystem(pl.LightningModule):
                 }
         progress_bar= {
                 "val_loss" : loss, 
-                "val_cancer_dice" : cancer_dice
+                #"val_cancer_dice" : cancer_dice,
+                "val_kidney_dice" : kidney_dice
                 }
  
         return {"val_loss" : loss, "log" : tensorboard_logs}#, "progress_bar" : progress_bar}
@@ -102,7 +105,8 @@ class UNetSystem(pl.LightningModule):
                 }
         progress_bar = {
                 "val_loss" : avg_loss,
-                "val_cancer_dice" : avg_cancer_dice
+                #"val_cancer_dice" : avg_cancer_dice, 
+                "val_kidney_dice" : avg_kidney_dice
                 }
 
 
