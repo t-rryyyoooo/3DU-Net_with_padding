@@ -43,7 +43,6 @@ class UNetSystem(pl.LightningModule):
 
         pred_onehot = torch.eye(self.num_class)[pred.argmax(dim=1)].to(self.device)
         label_onehot = torch.eye(self.num_class)[label].to(self.device)
-        print((label == 1).sum(), (label == 2).sum())
 
         bg_dice, kidney_dice, cancer_dice = self.DICE.computePerClass(label_onehot, pred_onehot)
 
