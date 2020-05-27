@@ -24,6 +24,7 @@ def croppingImage(image, lower_crop_size, upper_crop_size):
     crop_filter.SetLowerBoundaryCropSize(lower_crop_size.tolist())
     crop_filter.SetUpperBoundaryCropSize(upper_crop_size.tolist())
     cropped_image = crop_filter.Execute(image)
+
     return cropped_image
 
 def paddingImage(image, lower_pad_size, upper_pad_size, mirroring = False):
@@ -31,6 +32,7 @@ def paddingImage(image, lower_pad_size, upper_pad_size, mirroring = False):
     pad_filter.SetPadLowerBound(lower_pad_size.tolist())
     pad_filter.SetPadUpperBound(upper_pad_size.tolist())
     padded_image = pad_filter.Execute(image)
+
     return padded_image
 
 
