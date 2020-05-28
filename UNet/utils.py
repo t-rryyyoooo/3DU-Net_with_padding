@@ -27,11 +27,15 @@ def makeAffineParameters(image, translate, rotate, shear, scale):
     shear = np.random.uniform(-shear, shear, 2)
     scale = np.random.uniform(1 - scale, 1 + scale)
     center = (np.array(image.GetSize()) * np.array(image.GetSpacing()) / 2)[::-1]
-    
+
+    rotation = np.radians(0)
+    scale = 1
     return [translation, rotation, scale, shear, center]
 
 def makeAffineMatrix(translate, rotate, scale, shear, center):
     a = sitk.AffineTransform(3)
+
+    rotate = np.radians(0)
 
     a.SetCenter(center)
     a.Rotate(1, 0, rotate)
