@@ -84,7 +84,7 @@ class UNetSystem(pl.LightningModule):
                 }
         progress_bar= {
                 "val_loss" : loss, 
-                #"val_cancer_dice" : cancer_dice,
+                "val_cancer_dice" : cancer_dice,
                 "val_kidney_dice" : kidney_dice
                 }
  
@@ -104,7 +104,7 @@ class UNetSystem(pl.LightningModule):
                 }
         progress_bar = {
                 "val_loss" : avg_loss,
-                #"val_cancer_dice" : avg_cancer_dice, 
+                "val_cancer_dice" : avg_cancer_dice, 
                 "val_kidney_dice" : avg_kidney_dice
                 }
 
