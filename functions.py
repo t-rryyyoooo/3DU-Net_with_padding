@@ -89,3 +89,13 @@ def advancedSettings(xlabel, ylabel, fontsize=20):
     plt.show()
     
     return 
+
+def caluculateAVG(num):
+    if len(num) == 0:
+        return -1
+    else:
+        nsum = 0
+        for i in range(len(num)):
+            nsum += num[i]
+
+        return nsum / len(num)

@@ -143,11 +143,11 @@ class extractor():
         with tqdm(total=len(predict_array_list), desc="Restoring image...", ncols=60) as pbar:
             for pre_array, idx in zip(predict_array_list, self.meta["total_patch_idx"]):
                 z_slice = slice(idx[0], idx[0] + self.meta["patch_size"][0])
-                x_slice = slice(idx[1], idx[1] + self.meta["patch_size"][1])
-                y_slice = slice(idx[2], idx[2] + self.meta["patch_size"][2])
+                y_slice = slice(idx[1], idx[1] + self.meta["patch_size"][1])
+                x_slice = slice(idx[2], idx[2] + self.meta["patch_size"][2])
 
 
-                predict_array[y_slice, x_slice, z_slice] = pre_array
+                predict_array[x_slice, y_slice, z_slice] = pre_array
                 pbar.update(1)
 
 

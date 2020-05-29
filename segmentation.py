@@ -18,8 +18,9 @@ def ParseArgs():
     parser.add_argument("modelweightfile", help="Trained model weights file (*.hdf5).")
     parser.add_argument("savePath", help="Segmented label file.(.mha)")
     
-    parser.add_argument("--patch_size", help="28-44-44", default="28-44-44")
-    parser.add_argument("--slide", help="2-2-2", default=None)
+    parser.add_argument("--patch_size", help="16-48-48", default="16-48-48")
+    parser.add_argument("--slide", help="1-1-1")
+    parser.add_argument("-g", "--gpuid", help="0 1", nargs="*", default=1, type=int)
 
     args = parser.parse_args()
     return args
@@ -77,12 +78,13 @@ def main(args):
     cnt = 0
     for image_array in tqdm(image_array_list, desc="Segmenting images...", ncols=60):
         image_array = image_array.transpose(2, 0, 1)
-        image_array = torch.from_numpy(image_array[np.newaxis, ...]).to(device, dtype=torch.float)
+        image_array = torch.from_numpy(image_array[np.newaxis, np.newaxis, ...]).to(device, dtype=torch.float)
 
         segmented_array = model(image_array)
         segmented_array = segmented_array.to("cpu").detach().numpy().astype(np.float)
         segmented_array = np.squeeze(segmented_array)
         segmented_array = np.argmax(segmented_array, axis=0).astype(np.uint8)
+        segmented_array = segmented_array.transpose(1, 2, 0)
 
         segmented_array_list.append(segmented_array)
 

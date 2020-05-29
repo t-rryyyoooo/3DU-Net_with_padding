@@ -1,7 +1,7 @@
 from UNet.system import UNetSystem
 from UNet.modelCheckpoint import BestAndLatestModelCheckpoint
 import pytorch_lightning as pl
-#from pytorch_lightning.loggers import CometLogger
+from pytorch_lightning.loggers import CometLogger
 import json
 import argparse
 import torch
@@ -36,14 +36,14 @@ def main(args):
     project_name = input_json["project_name"]
     experiment_name = input_json["experiment_name"]
     log = input_json["log"]
-    #comet_logger = CometLogger(
-    #        api_key = api_key,
-    #        project_name = project_name,  
-    #        experiment_name = experiment_name,
-    #        save_dir = log
-    #)
+    comet_logger = CometLogger(
+            api_key = api_key,
+            project_name = project_name,  
+            experiment_name = experiment_name,
+            save_dir = log
+    )
  
-    #torch.manual_seed(0)
+    torch.manual_seed(0)
 
     system = UNetSystem(
             dataset_path = dataset_path,
@@ -60,7 +60,7 @@ def main(args):
             num_sanity_val_steps = 0, 
             max_epochs = epoch,
             checkpoint_callback = None, 
-            #logger = comet_logger,
+            logger = comet_logger,
             gpus = gpu_ids
         )
     trainer.fit(system)
