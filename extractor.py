@@ -29,11 +29,12 @@ class extractor():
         """
         
         self.image = image
+        self.label = label
         if phase == "train":
             self.label = label
             self.mask = mask
 
-        elif phase == "seg":
+        elif phase == "segmentation":
             self.mask = mask
             if mask is not None:
                 self.label = mask
@@ -119,7 +120,7 @@ class extractor():
                             clipped_mask_array = sitk.GetArrayFromImage(clipped_mask)
 
                             """ If you feed mask image, you check if the image contains the masked part. If not, skip and set False to the check_mask array"""
-                            if phase == "train" and (clipped_mask_array == 0).all(): 
+                            if self.phase == "train" and (clipped_mask_array == 0).all(): 
                                 pbar.update(1)
                                 continue
                       

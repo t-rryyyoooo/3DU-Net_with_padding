@@ -19,14 +19,15 @@ do
 
 
     save="${SAVE}/case_00${number}/label.mha"
-    imageDirectory="${DATA}/case_00${number}"
+    image_path="${DATA}/case_00${number}/imaging.nii.gz"
+    mask_path="${DATA}/case_00${number}/segmentation.nii.gz"
 
-    echo $imageDirectory
+    echo $image_path
     echo $WEIGHT
     echo $save
     echo "GPU ID: $id"
 
-    python3 segmentation.py $imageDirectory $WEIGHT $save -g $id 
+    python3 segmentation.py $image_path $WEIGHT $save --mask_path $mask_path -g $id 
 
 
 done

@@ -2,7 +2,7 @@
 
 #Input
 readonly DATA="$HOME/Desktop/data/kits19"
-readonly SAVE="$HOME/Desktop/data/patch/16-48-48" 
+readonly SAVE="$HOME/Desktop/data/patch/16-48-48/cancer" 
 readonly LOG="fail/extractImage.txt"
 readonly PATCHSIZE="16-48-48"
 
@@ -15,12 +15,16 @@ for number in ${numArr[@]}
 do
 
 	data="${DATA}/case_00${number}"
+        image="${data}/imaging.nii.gz"
+        label="${data}/segmentation.nii.gz"
+        mask="${data}/mask.mha"
+        save="${SAVE}/case_00${number}"
 
 	echo "DATA:$data"
 	echo "SAVE:$SAVE"
 	echo "PATCHSIZE:${PATCHSIZE}"
 
-	python3 extractImage.py ${data} ${SAVE} --patch_size ${PATCHSIZE} --only_mask
+	python3 extractImage.py ${image} ${label} ${save} --mask_path ${mask}
 
 	if [ $? -eq 0 ]; then
    echo "case_00${number} done."

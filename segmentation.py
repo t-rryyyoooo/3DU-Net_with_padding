@@ -31,14 +31,17 @@ def main(args):
     device = torch.device("cuda" if use_cuda else "cpu")
     """ Slice module. """
 
-    image = sitk.ReadImage(label_path)
+    image = sitk.ReadImage(args.image_path)
+    if args.mask_path is not None:
+        mask = sitk.ReadImage(args.mask_path)
+    else:
+        mask = None
 
     """ Dummy image """
     label = sitk.Image(image.GetSize(), sitk.sitkInt8)
     label.SetOrigin(image.GetOrigin())
     label.SetDirection(image.GetDirection())
     label.SetSpacing(image.GetSpacing())
-    print((sitk.GetArrayFromImage(self.label) == 0).all())
 
     """ Get the patch size from string."""
     matchobj = re.match("([0-9]+)-([0-9]+)-([0-9]+)", args.image_patch_size)
@@ -73,6 +76,7 @@ def main(args):
             image_patch_size = image_patch_size, 
             label_patch_size = label_patch_size, 
             slide = slide, 
+            phase = "segmentation"
             )
 
     extractor.execute()
@@ -89,8 +93,7 @@ def main(args):
     """ Segmentation module. """
 
     segmented_array_list = []
-    cnt = 0
-    for image_array mask_array in tqdm(zip(image_array_list, mask_array_list), desc="Segmenting images...", ncols=60):
+    for image_array, mask_array in tqdm(zip(image_array_list, mask_array_list), desc="Segmenting images...", ncols=60):
         if args.mask_path is not None and (mask_array == 0).all():
             segmented_array_list.append(mask_array)
             continue
@@ -109,11 +112,12 @@ def main(args):
     """ Restore module. """
     segmented = extractor.restore(segmented_array_list)
 
-    createParentPath(args.savePath)
-    print("Saving image to {}".format(args.savePath))
-    sitk.WriteImage(segmented, args.savePath, True)
+    createParentPath(args.save_path)
+    print("Saving image to {}".format(args.save_path))
+    sitk.WriteImage(segmented, args.save_path, True)
 
 
 if __name__ == '__main__':
     args = ParseArgs()
     main(args)
+    
