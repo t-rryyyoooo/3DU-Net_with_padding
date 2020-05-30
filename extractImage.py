@@ -10,35 +10,42 @@ args = None
 def ParseArgs():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("imageDirectory", help="$HOME/Desktop/data/kits19/case_00000")
-    parser.add_argument("saveSlicePath", help="$HOME/Desktop/data/slice/hist_0.0", default=None)
-    parser.add_argument("--patch_size", help="28-44-44", default="28-44-44")
+    parser.add_argument("image_path", help="$HOME/Desktop/data/kits19/case_00000/imaging.nii.gz")
+    parser.add_argument("label_path", help="$HOME/Desktop/data/kits19/case_00000/segmentation.nii.gz")
+    parser.add_argument("save_slice_path", help="$HOME/Desktop/data/slice/hist_0.0/case_00000", default=None)
+    parser.add_argument("--mask_path", help="$HOME/Desktop/data/kits19/case_00000/label.mha")
+    parser.add_argument("--image_patch_size", help="16-48-48", default="16-48-48")
+    parser.add_argument("--label_patch_size", help="16-48-48", default="16-48-48")
     parser.add_argument("--slide", help="2-2-2", default=None)
-    parser.add_argument("--only_mask",action="store_true" )
 
     args = parser.parse_args()
     return args
 
 def main(args):
-    labelFile = Path(args.imageDirectory) / 'segmentation.nii.gz'
-    imageFile = Path(args.imageDirectory) / 'imaging.nii.gz'
-
     """ Read image and label. """
-    label = sitk.ReadImage(str(labelFile))
-    """
-    from functions import getImageWithMeta
-    import numpy as np
-    label = getImageWithMeta(np.ones_like(sitk.GetArrayFromImage(label)), label)
-    """
-    image = sitk.ReadImage(str(imageFile))
+    label = sitk.ReadImage(args.label_path)
+    image = sitk.ReadImage(args.image_path)
+    if args.mask_path is not None:
+        mask = sitk.ReadImage(args.mask_path)
+    else:
+        mask = None
 
     """ Get the patch size from string."""
-    matchobj = re.match("([0-9]+)-([0-9]+)-([0-9]+)", args.patch_size)
+    matchobj = re.match("([0-9]+)-([0-9]+)-([0-9]+)", args.image_patch_size)
     if matchobj is None:
-        print("[ERROR] Invalid patch size : {}.".fotmat(args.patch_size))
+        print("[ERROR] Invalid patch size : {}.".fotmat(args.image_patch_size))
         sys.exit()
 
-    patch_size = [int(s) for s in matchobj.groups()]
+    image_patch_size = [int(s) for s in matchobj.groups()]
+    
+    """ Get the patch size from string."""
+    matchobj = re.match("([0-9]+)-([0-9]+)-([0-9]+)", args.label_patch_size)
+    if matchobj is None:
+        print("[ERROR] Invalid patch size : {}.".fotmat(args.label_patch_size))
+        sys.exit()
+
+    label_patch_size = [int(s) for s in matchobj.groups()]
+
 
     """ Get the slide size from string."""
     if args.slide is not None:
@@ -55,19 +62,15 @@ def main(args):
     extractor = extor(
             image = image, 
             label = label,
-            patch_size = patch_size, 
+            mask = mask,
+            image_patch_size = image_patch_size, 
+            label_patch_size = label_patch_size, 
             slide = slide, 
-            only_mask = args.only_mask
+            phase="train"
             )
 
     extractor.execute()
-    patientID = args.imageDirectory.split("/")[-1]
-    extractor.save(args.saveSlicePath, patientID)
-    """
-    i, l = extractor.output("Array")
-    kk = extractor.restore(l)
-    print((sitk.GetArrayFromImage(kk) == 2).all())
-    """
+    extractor.save(args.save_slice_path)
 
 
 if __name__ == '__main__':

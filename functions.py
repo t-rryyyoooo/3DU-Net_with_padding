@@ -19,7 +19,7 @@ def getImageWithMeta(imageArray, refImage, spacing=None, origin=None, direction=
 
     return image
 
-def croppingImage(image, lower_crop_size, upper_crop_size):
+def cropping(image, lower_crop_size, upper_crop_size):
     crop_filter = sitk.CropImageFilter()
     crop_filter.SetLowerBoundaryCropSize(lower_crop_size.tolist())
     crop_filter.SetUpperBoundaryCropSize(upper_crop_size.tolist())
@@ -27,13 +27,35 @@ def croppingImage(image, lower_crop_size, upper_crop_size):
 
     return cropped_image
 
-def paddingImage(image, lower_pad_size, upper_pad_size, mirroring = False):
+def padding(image, lower_pad_size, upper_pad_size, mirroring = False):
     pad_filter = sitk.MirrorPadImageFilter() if mirroring else sitk.ConstantPadImageFilter()
     pad_filter.SetPadLowerBound(lower_pad_size.tolist())
     pad_filter.SetPadUpperBound(upper_pad_size.tolist())
     padded_image = pad_filter.Execute(image)
 
     return padded_image
+
+def clipping(image, lower_clip_index, upper_clip_index):
+    z_slice = slice(lower_clip_index[0], upper_clip_index[0])
+    y_slice = slice(lower_clip_index[1], upper_clip_index[1])
+    x_slice = slice(lower_clip_index[2], upper_clip_index[2])
+
+    clipped_image = image[z_slice, y_slice, x_slice]
+
+    return clipped_image
+
+
+def caluculatePaddingSize(image_size, image_patch, label_patch, slide):
+    label_pad_size = label_patch - (image_size  % label_patch) + (label_patch - slide)
+    image_pad_size = label_pad_size + (image_patch - label_patch)
+
+    lower_pad_size_label = label_pad_size // 2
+    upper_pad_size_label = (label_pad_size + 1) // 2
+    lower_pad_size_image = image_pad_size // 2
+    upper_pad_size_image = (image_pad_size + 1) // 2
+    lower_pad_size = np.array([lower_pad_size_image, lower_pad_size_label])
+    upper_pad_size = np.array([upper_pad_size_image, upper_pad_size_label])
+    return lower_pad_size, upper_pad_size
 
 
 def DICE(trueLabel, result):

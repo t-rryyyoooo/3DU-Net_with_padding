@@ -14,13 +14,14 @@ import re
 def ParseArgs():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("imageDirectory", help="$HOME/Desktop/data/kits19/case_00000")
+    parser.add_argument("image_path", help="$HOME/Desktop/data/kits19/case_00000/imaging.nii.gz")
     parser.add_argument("modelweightfile", help="Trained model weights file (*.hdf5).")
-    parser.add_argument("savePath", help="Segmented label file.(.mha)")
-    
-    parser.add_argument("--patch_size", help="16-48-48", default="16-48-48")
+    parser.add_argument("save_path", help="Segmented label file.(.mha)")
+    parser.add_argument("--mask_path", help="$HOME/Desktop/data/kits19/case_00000/mask.mha")
+    parser.add_argument("--image_patch_size", help="16-48-48", default="16-48-48")
+    parser.add_argument("--label_patch_size", help="16-48-48", default="16-48-48")
     parser.add_argument("--slide", help="1-1-1")
-    parser.add_argument("-g", "--gpuid", help="0 1", nargs="*", default=1, type=int)
+    parser.add_argument("-g", "--gpuid", help="0 1", nargs="*", default=0, type=int)
 
     args = parser.parse_args()
     return args
@@ -29,19 +30,30 @@ def main(args):
     use_cuda = torch.cuda.is_available() and True
     device = torch.device("cuda" if use_cuda else "cpu")
     """ Slice module. """
-    labelFile = Path(args.imageDirectory) / "segmentation.nii.gz"
-    imageFile = Path(args.imageDirectory) / "imaging.nii.gz"
 
-    label = sitk.ReadImage(str(labelFile))
-    image = sitk.ReadImage(str(imageFile))
+    image = sitk.ReadImage(label_path)
+
+    """ Dummy image """
+    label = sitk.Image(image.GetSize(), sitk.sitkInt8)
+    label.SetOrigin(image.GetOrigin())
+    label.SetDirection(image.GetDirection())
+    label.SetSpacing(image.GetSpacing())
+    print((sitk.GetArrayFromImage(self.label) == 0).all())
 
     """ Get the patch size from string."""
-    matchobj = re.match("([0-9]+)-([0-9]+)-([0-9]+)", args.patch_size)
+    matchobj = re.match("([0-9]+)-([0-9]+)-([0-9]+)", args.image_patch_size)
     if matchobj is None:
-        print("[ERROR] Invalid patch size : {}.".fotmat(args.patch_size))
+        print("[ERROR] Invalid patch size : {}.".fotmat(args.image_patch_size))
         sys.exit()
 
-    patch_size = [int(s) for s in matchobj.groups()]
+    image_patch_size = [int(s) for s in matchobj.groups()]
+    """ Get the patch size from string."""
+    matchobj = re.match("([0-9]+)-([0-9]+)-([0-9]+)", args.label_patch_size)
+    if matchobj is None:
+        print("[ERROR] Invalid patch size : {}.".fotmat(args.label_patch_size))
+        sys.exit()
+
+    label_patch_size = [int(s) for s in matchobj.groups()]
 
     """ Get the slide size from string."""
     if args.slide is not None:
@@ -57,12 +69,14 @@ def main(args):
     extractor = extor(
             image = image, 
             label = label, 
-            patch_size = patch_size, 
+            mask = mask,
+            image_patch_size = image_patch_size, 
+            label_patch_size = label_patch_size, 
             slide = slide, 
             )
 
     extractor.execute()
-    image_array_list, l  = extractor.output("Array")
+    image_array_list, mask_array_list  = extractor.output("Array")
 
     """ Load model. """
 
@@ -76,7 +90,11 @@ def main(args):
 
     segmented_array_list = []
     cnt = 0
-    for image_array in tqdm(image_array_list, desc="Segmenting images...", ncols=60):
+    for image_array mask_array in tqdm(zip(image_array_list, mask_array_list), desc="Segmenting images...", ncols=60):
+        if args.mask_path is not None and (mask_array == 0).all():
+            segmented_array_list.append(mask_array)
+            continue
+
         image_array = image_array.transpose(2, 0, 1)
         image_array = torch.from_numpy(image_array[np.newaxis, np.newaxis, ...]).to(device, dtype=torch.float)
 
