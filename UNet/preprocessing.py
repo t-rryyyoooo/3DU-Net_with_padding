@@ -19,11 +19,6 @@ class ReadImage(object):
 
         return image, label
 
-class RandomFlip(object):
-    def __call__(self, image, label):
-
-
-
 class AffineTransform(object):
     def __init__(self, translate_range, rotate_range, shear_range, scale_range, bspline=None):
         self.translate_range = translate_range
