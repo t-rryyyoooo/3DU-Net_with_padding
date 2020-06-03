@@ -16,7 +16,7 @@ class extractor():
     In this class we use simpleITK to clip mainly. Pay attention to the axis.
     
     """
-    def __init__(self, image, label, mask=None, image_patch_size=[16, 48, 48], label_patch_size=[16, 48, 48], slide=None, phase="train"):
+    def __init__(self, image, label, mask=None, image_patch_size=[16, 48, 48], label_patch_size=[16, 48, 48], slide=None, phase="train", threshold=0):
         """
         image : original CT image
         label : original label image
@@ -25,6 +25,7 @@ class extractor():
         label_patch_size : patch size for label image.
         slide : When clipping, shit the clip position by slide
         phase : train -> For training model, seg -> For segmentation
+        threshold : Criteria not to save.
 
         """
         
@@ -44,6 +45,7 @@ class extractor():
             sys.exit()
 
         self.phase = phase
+        self.threshold = threshold
 
         """ patch_size = [z, y, x] """
         self.image_patch_size = np.array(image_patch_size)
@@ -54,9 +56,10 @@ class extractor():
             self.slide = self.label_patch_size
         else:
             self.slide = np.array(slide)
-            if ((self.patch_size % self.slide) != 0).any():
+            if ((self.label_patch_size % self.slide) != 0).any():
                 print("[ERROR] Invalid slide size : {}.".format(self.slide))
                 sys.exit()
+
 
     def execute(self):
         """
@@ -120,7 +123,8 @@ class extractor():
                             clipped_mask_array = sitk.GetArrayFromImage(clipped_mask)
 
                             """ If you feed mask image, you check if the image contains the masked part. If not, skip and set False to the check_mask array"""
-                            if self.phase == "train" and (clipped_mask_array == 0).all(): 
+                            mask_rate = (clipped_mask_array > 0).sum() / (clipped_mask_array > -1).sum()
+                            if self.phase == "train" and mask_rate < self.threshold:
                                 pbar.update(1)
                                 continue
                       

@@ -2,7 +2,7 @@
 
 #Input
 readonly DATA="$HOME/Desktop/data/kits19"
-readonly SAVE="$HOME/Desktop/data/patch/16-48-48/cancer/segmentation"
+readonly SAVE="$HOME/Desktop/data/patch/16-48-48-2/cancer/segmentation"
 readonly WEIGHT="$HOME/Desktop/data/modelweight/16-48-48/cancer/latest.pkl"
 readonly IMAGE="imaging.nii.gz"
 readonly MASK="segmentation.nii.gz"

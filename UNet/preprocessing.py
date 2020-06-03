@@ -43,18 +43,22 @@ class AffineTransform(object):
         return transformed_image, transformed_label
 
 class GetArrayFromImage(object):
+    def __init__(self, classes):
+        self.classes = classes
+        
     def __call__(self, image, label):
-        imageArray = sitk.GetArrayFromImage(image)
-        labelArray = sitk.GetArrayFromImage(label).astype(int)
+        image_array = sitk.GetArrayFromImage(image)
+        label_array = sitk.GetArrayFromImage(label).astype(int)
 
         if image.GetDimension() != 4:
-            imageArray = imageArray[..., np.newaxis]
-            
+            image_array = image_array[..., np.newaxis]
 
-        imageArray = imageArray.transpose((3, 2, 0, 1))
-        labelArray = labelArray.transpose((2, 0, 1))
+        label_array = np.identity(self.classes)[label_array]
 
-        return imageArray, labelArray
+        image_array = image_array.transpose((3, 2, 0, 1))
+        label_array = label_array.transpose((3, 2, 0, 1))
+
+        return image_array, label_array
 
 
 

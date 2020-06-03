@@ -17,6 +17,7 @@ def ParseArgs():
     parser.add_argument("--image_patch_size", help="16-48-48", default="16-48-48")
     parser.add_argument("--label_patch_size", help="16-48-48", default="16-48-48")
     parser.add_argument("--slide", help="2-2-2", default=None)
+    parser.add_argument("--threshold", help="Criteria not to save", default=0, type=float)
 
     args = parser.parse_args()
     return args
@@ -66,7 +67,8 @@ def main(args):
             image_patch_size = image_patch_size, 
             label_patch_size = label_patch_size, 
             slide = slide, 
-            phase="train"
+            phase="train",
+            threshold = args.threshold
             )
 
     extractor.execute()

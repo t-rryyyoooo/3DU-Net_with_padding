@@ -24,7 +24,7 @@ class UNetSystem(pl.LightningModule):
         self.checkpoint = checkpoint
         self.num_workers = num_workers
         self.DICE = DICE(self.num_class, self.device)
-        self.loss = WeightedCategoricalCrossEntropy("log", device=self.device)
+        self.loss = WeightedCategoricalCrossEntropy(device=self.device)
 
     def forward(self, x):
         x = self.model(x)
@@ -34,20 +34,17 @@ class UNetSystem(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         image, label = batch
         image = image.to(self.device, dtype=torch.float)
-        label = label.to(self.device, dtype=torch.long)
+        label = label.to(self.device, dtype=torch.float)
 
         pred = self.forward(image).to(self.device)
 
-        """ Channel last for loss. """
-        pred_last = pred.permute(0, 2, 3, 4, 1).to(self.device)
 
         pred_onehot = torch.eye(self.num_class)[pred.argmax(dim=1)].to(self.device)
-        label_onehot = torch.eye(self.num_class)[label].to(self.device)
+        label_last = label.permute(0, 2, 3, 4, 1)
 
-        bg_dice, kidney_dice, cancer_dice = self.DICE.computePerClass(label_onehot, pred_onehot)
+        bg_dice, kidney_dice, cancer_dice = self.DICE.computePerClass(label_last, pred_onehot)
 
-        #loss = nn.functional.cross_entropy(pred, label, reduction="none")
-        loss = self.loss(pred_last, label_onehot)
+        loss = self.loss(pred, label)
 
 
         tensorboard_logs = {
@@ -64,18 +61,15 @@ class UNetSystem(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         image, label = batch
         image = image.to(self.device, dtype=torch.float)
-        label = label.to(self.device, dtype=torch.long)
+        label = label.to(self.device, dtype=torch.float)
         pred = self.forward(image)
-        pred_last = pred.permute(0, 2, 3, 4, 1).to(self.device)
 
+        label_last = label.permute(0, 2, 3, 4, 1)
         pred_onehot = torch.eye(self.num_class)[pred.argmax(dim=1)].to(self.device)
-        label_onehot = torch.eye(self.num_class)[label].to(self.device)
 
-        bg_dice, kidney_dice, cancer_dice = self.DICE.computePerClass(label_onehot, pred_onehot)
+        bg_dice, kidney_dice, cancer_dice = self.DICE.computePerClass(label_last, pred_onehot)
 
-        loss = self.loss(pred_last, label_onehot)
-        #loss = self.loss(pred_onehot, label_onehot)
-        #loss = nn.functional.cross_entropy(pred, label)
+        loss = self.loss(pred, label)
 
         tensorboard_logs = {
                 "val_loss" : loss, 
@@ -128,7 +122,7 @@ class UNetSystem(pl.LightningModule):
                 dataset_path = self.dataset_path, 
                 phase = "train", 
                 criteria = self.criteria,
-                transform = UNetTransform(translate, rotate, shear, scale)
+                transform = UNetTransform(self.num_class, translate, rotate, shear, scale)
                 )
 
         train_loader = DataLoader(
@@ -146,7 +140,7 @@ class UNetSystem(pl.LightningModule):
                 dataset_path = self.dataset_path, 
                 phase = "val", 
                 criteria = self.criteria,
-                transform = UNetTransform()
+                transform = UNetTransform(self.num_class)
                 )
 
         val_loader = DataLoader(
