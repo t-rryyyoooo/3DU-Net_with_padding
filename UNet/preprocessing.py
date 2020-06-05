@@ -1,6 +1,7 @@
 import SimpleITK as sitk
 import numpy as np
 from .utils import *
+from random import randint
 
 class Compose(object):
     def __init__(self, transforms):
@@ -60,11 +61,20 @@ class GetArrayFromImage(object):
 
         return image_array, label_array
 
+class RandomFlip(object):
+    def __call__(self, image, label):
+        dimension = image.GetDimension()
+        flip_filter = sitk.FlipImageFilter()
 
+        flip_axes = [bool(randint(0, 1)) for _ in range(dimension)]
+        flip_filter.SetFlipAxes(flip_axes)
 
+        flipped_image = flip_filter.Execute(image)
+        flipped_label = flip_filter.Execute(label)
 
+        flipped_image = setMeta(flipped_image, image)
+        flipped_label = setMeta(flipped_label, label)
 
-
-
+        return flipped_image, flipped_label
 
 

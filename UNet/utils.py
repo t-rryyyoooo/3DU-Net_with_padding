@@ -3,6 +3,22 @@ import numpy as np
 from pathlib import Path
 import torch
 
+def setMeta(to_image, ref_image, direction=None, origin=None, spacing=None):
+    if direction is None:
+        direction = ref_image.GetDirection()
+
+    if origin is None:
+        origin = ref_image.GetOrigin()
+
+    if spacing is None:
+        spacing = ref_image.GetSpacing()
+
+    to_image.SetDirection(direction)
+    to_image.SetOrigin(origin)
+    to_image.SetSpacing(spacing)
+
+    return to_image
+
 def separateData(dataset_path, criteria, phase): 
     dataset = []
     for number in criteria[phase]:
@@ -28,14 +44,10 @@ def makeAffineParameters(image, translate, rotate, shear, scale):
     scale = np.random.uniform(1 - scale, 1 + scale)
     center = (np.array(image.GetSize()) * np.array(image.GetSpacing()) / 2)[::-1]
 
-    rotation = np.radians(0)
-    scale = 1
     return [translation, rotation, scale, shear, center]
 
 def makeAffineMatrix(translate, rotate, scale, shear, center):
     a = sitk.AffineTransform(3)
-
-    rotate = np.radians(0)
 
     a.SetCenter(center)
     a.Rotate(1, 0, rotate)
