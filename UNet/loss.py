@@ -13,7 +13,7 @@ class WeightedCategoricalCrossEntropy(nn.Module):
         """
         
         eps = 10**(-9)
-        result = torch.sum(true, dim=[0, 2, 3, 4])
+        result = torch.sum(true, dim=[0,1, 2, 3, 4])
 
         result_f = torch.log(result)
     
