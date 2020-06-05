@@ -46,7 +46,6 @@ class UNetSystem(pl.LightningModule):
 
         loss = self.loss(pred, label)
 
-
         tensorboard_logs = {
                 "train_loss" : loss, 
                 "kidney_dice" : kidney_dice, 
@@ -81,7 +80,8 @@ class UNetSystem(pl.LightningModule):
                 "val_cancer_dice" : cancer_dice,
                 "val_kidney_dice" : kidney_dice
                 }
- 
+
+
         return {"val_loss" : loss, "log" : tensorboard_logs}#, "progress_bar" : progress_bar}
 
     def validation_epoch_end(self, outputs):
