@@ -12,6 +12,7 @@ class UNetTransform():
                 "train" : Compose([
                     ReadImage(), 
                     AffineTransform(self.translate_range, self.rotate_range, self.shear_range, self.scale_range),
+                    RandomFlip(),
                     GetArrayFromImage(self.classes)
                     ]), 
 

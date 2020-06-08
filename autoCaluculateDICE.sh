@@ -3,8 +3,8 @@
 #Input
 readonly TRUE="$HOME/Desktop/data/kits19"
 readonly TEXT="$HOME/Desktop/data/result"
-readonly RESULT="$HOME/Desktop/data/patch/16-48-48-2-0001/cancer/segmentation"
-readonly PREFIX="16-48-48-2-0001-latest"
+readonly RESULT="$HOME/Desktop/data/patch/16-48-48-2-0001/cancer_2/segmentation"
+readonly PREFIX="16-48-48-2-0001_3-latest"
 
 
 mkdir -p $TEXT

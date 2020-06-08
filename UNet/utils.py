@@ -41,6 +41,7 @@ def makeAffineParameters(image, translate, rotate, shear, scale):
     translation = np.random.uniform(-translate, translate, dimension)
     rotation = np.radians(np.random.uniform(-rotate, rotate))
     shear = np.random.uniform(-shear, shear, 2)
+#scale = np.random.uniform(1 - scale, 1 + scale, 3)
     scale = np.random.uniform(1 - scale, 1 + scale)
     center = (np.array(image.GetSize()) * np.array(image.GetSpacing()) / 2)[::-1]
 
@@ -53,7 +54,8 @@ def makeAffineMatrix(translate, rotate, scale, shear, center):
     a.Rotate(1, 0, rotate)
     a.Shear(1, 0, shear[0])
     a.Shear(0, 1, shear[1])
-    a.Scale((scale, scale, 1))
+    a.Scale((scale, scale, scale))
+#a.Scale(scale)
     a.Translate(translate)
 
     return a
