@@ -135,7 +135,7 @@ class UNetModel(nn.Module):
 
 if __name__ == "__main__":
     model=UNetModel(1 ,3)
-    net_shape = [1, 1, 44, 44, 16]
+    net_shape = [1, 1, 48, 48, 16]
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     model.to(device)

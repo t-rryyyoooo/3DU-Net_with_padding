@@ -113,9 +113,9 @@ class UNetSystem(pl.LightningModule):
     @pl.data_loader
     def train_dataloader(self):
         translate = 0
-        rotate = 180
+        rotate = 0
         shear = 0.0
-        scale = 0.05
+        scale = 0.0
         batch_size = self.batch_size
 
         train_dataset = UNetDataset(

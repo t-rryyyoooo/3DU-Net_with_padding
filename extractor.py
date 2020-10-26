@@ -124,7 +124,7 @@ class extractor():
 
                             """ If you feed mask image, you check if the image contains the masked part. If not, skip and set False to the check_mask array"""
                             mask_rate = (clipped_mask_array > 0).sum() / (clipped_mask_array > -1).sum()
-                            if self.phase == "train" and mask_rate < self.threshold:
+                            if self.phase == "train" and mask_rate <= self.threshold:
                                 pbar.update(1)
                                 continue
                       
